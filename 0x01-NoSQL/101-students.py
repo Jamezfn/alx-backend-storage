@@ -1,28 +1,21 @@
-#!/usr/bin/env python3
-'''Task 14's module.
-'''
+#!/usr/bin/env python
 
+from pymongo import MongoClient
 
 def top_students(mongo_collection):
-    '''Prints all students in a collection sorted by average score.
-    '''
-    students = mongo_collection.aggregate(
-        [
-            {
-                '$project': {
-                    '_id': 1,
-                    'name': 1,
-                    'averageScore': {
-                        '$avg': {
-                            '$avg': '$topics.score',
-                        },
-                    },
-                    'topics': 1,
-                },
-            },
-            {
-                '$sort': {'averageScore': -1},
-            },
-        ]
-    )
-    return students
+    """Returns all students sorted by average score in descending order."""
+    pipeline = [
+        {
+            "$addFields": {
+                "averageScore": {
+                    "$avg": "$topics.score"
+                }
+            }
+        },
+        {
+            "$sort": {
+                "averageScore": -1
+            }
+        }
+    ]
+    return list(mongo_collection.aggregate(pipeline))
